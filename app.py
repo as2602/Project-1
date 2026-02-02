@@ -1,4 +1,6 @@
 
+
+
 # # app.py
 # import streamlit as st
 # from Backend.llm_utils import get_gemini_feedback, llm_feedback
@@ -11,15 +13,16 @@
 #     layout="wide"
 # )
 
+# # ---------------- TITLE ----------------
 # st.title("🎓 AI Interview Coach")
 # st.markdown("""
-# Enter your interview question and answer below.  
-# You will get ** Your Answer feedback**, **suggestion**.
+# Enter your interview **question** and **answer** below.  
+# You will receive **result**, **answer feedback**, and **AI suggestions**.
 # """)
 
 # # ---------------- SIDEBAR INPUTS ----------------
-# st.sidebar.header("Input Your Answer")
-# question = st.sidebar.text_input("Enter Question")
+# st.sidebar.header("📝 Input Your Answer")
+# question = st.sidebar.text_input("Enter Interview Question")
 # answer = st.sidebar.text_area("Enter Your Answer", height=180)
 
 # # ---------------- SUBMIT ----------------
@@ -28,8 +31,9 @@
 #     if not question or not answer:
 #         st.warning("⚠ Please enter both question and answer")
 #     else:
-#         # 1️⃣ Keyword lookup
+#         # ---------------- KEYWORD LOOKUP ----------------
 #         keywords = keyword_map.get(question)
+
 #         if not keywords:
 #             st.info("Extracting keywords using AI...")
 #             keywords_text = get_gemini_feedback(
@@ -41,70 +45,73 @@
 #             except:
 #                 keywords = []
 
-#         # 2️⃣ Rule-based scoring
+#         # ---------------- RULE-BASED SCORING ----------------
 #         score = final_score(answer, keywords)
 #         quality = get_quality(score)
 #         rule_fb = feedback(answer, keywords)
 
-#         # ---------------- LAYOUT ----------------
-#         col1, col2, col3 = st.columns(3, gap="large")
+#         # ==================================================
+#         # ROW 1 → RESULT + YOUR ANSWER FEEDBACK
+#         # ==================================================
+#         col1, col2 = st.columns([1, 2], gap="large")
 
-#         # 3️⃣ RESULT + TRAFFIC LIGHT (INLINE)
+#         # ---------------- RESULT ----------------
 #         with col1:
-#             st.subheader("Result")
+#             st.subheader("📊 Result")
 
 #             if quality.lower() == "weak":
-#                 st.markdown(
-#                     """
-#                     <div style="display:flex; align-items:center; gap:10px;">
-#                         <div style="width:14px;height:14px;background:red;
-#                                     border-radius:50%;box-shadow:0 0 8px red;"></div>
-#                         <span style="font-size:18px;">Weak</span>
-#                     </div>
-#                     """,
-#                     unsafe_allow_html=True
-#                 )
-
+#                 color = "red"
+#                 label = "Weak"
 #             elif quality.lower() == "average":
-#                 st.markdown(
-#                     """
-#                     <div style="display:flex; align-items:center; gap:10px;">
-#                         <div style="width:14px;height:14px;background:yellow;
-#                                     border-radius:50%;box-shadow:0 0 8px yellow;"></div>
-#                         <span style="font-size:18px;">Average</span>
-#                     </div>
-#                     """,
-#                     unsafe_allow_html=True
-#                 )
-
+#                 color = "yellow"
+#                 label = "Average"
 #             else:
-#                 st.markdown(
-#                     """
-#                     <div style="display:flex; align-items:center; gap:10px;">
-#                         <div style="width:14px;height:14px;background:green;
-#                                     border-radius:50%;box-shadow:0 0 8px green;"></div>
-#                         <span style="font-size:18px;">Good</span>
-#                     </div>
-#                     """,
-#                     unsafe_allow_html=True
-#                 )
+#                 color = "green"
+#                 label = "Good"
 
-#         # 4️⃣ RULE-BASED FEEDBACK
+#             st.markdown(
+#                 f"""
+#                 <div style="display:flex; align-items:center; gap:12px;">
+#                     <div style="width:16px;height:16px;
+#                                 background:{color};
+#                                 border-radius:50%;
+#                                 box-shadow:0 0 10px {color};">
+#                     </div>
+#                     <span style="font-size:20px; font-weight:600;">
+#                         {label}
+#                     </span>
+#                 </div>
+#                 """,
+#                 unsafe_allow_html=True
+#             )
+
+#             st.metric(label="Score", value=f"{score}/5")
+
+#         # ---------------- RULE-BASED FEEDBACK ----------------
 #         with col2:
-#             st.subheader("Your Answer Feedback ")
+#             st.subheader("🧠 Your Answer Feedback")
+
 #             if rule_fb:
 #                 for r in rule_fb:
 #                     st.write("•", r)
 #             else:
-#                 st.write("Looks good 👍")
+#                 st.success("Looks good 👍 No major issues found.")
 
-#         # 5️⃣ LLM FEEDBACK
-#         with col3:
-#             st.subheader("Suggestion for You")
-#             with st.spinner("Generating feedback..."):
-#                 prompt = llm_feedback(question, answer, rule_fb, quality)
-#                 llm_result = get_gemini_feedback(prompt)
-#             st.text_area("AI Feedback", llm_result, height=300)
+#         # ==================================================
+#         # ROW 2 → AI SUGGESTION (FULL WIDTH)
+#         # ==================================================
+#         st.markdown("---")
+#         st.subheader("🤖 Suggestion for You")
+
+#         with st.spinner("Generating AI feedback..."):
+#             prompt = llm_feedback(question, answer, rule_fb, quality)
+#             llm_result = get_gemini_feedback(prompt)
+
+#         st.text_area(
+#             label="AI Feedback",
+#             value=llm_result,
+#             height=320
+#         )
 
 
 # app.py
@@ -118,6 +125,67 @@ st.set_page_config(
     page_icon="🎓",
     layout="wide"
 )
+
+# ==================================================
+# 🌗 THEME TOGGLE
+# ==================================================
+st.sidebar.header("🎨 Appearance")
+dark_mode = st.sidebar.toggle("Dark Mode", value=False)
+
+# ---------------- THEME STYLES ----------------
+if dark_mode:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #0E1117;
+            color: #FAFAFA;
+        }
+
+        textarea, input {
+            background-color: #1E1E1E !important;
+            color: #FAFAFA !important;
+        }
+
+        div[data-testid="stMetric"] {
+            background-color: #1E1E1E;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .stTextArea textarea {
+            background-color: #1E1E1E !important;
+            color: #FAFAFA !important;
+        }
+
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+else:
+    st.markdown(
+        """
+        <style>
+        .stApp {
+            background-color: #FFFFFF;
+            color: #000000;
+        }
+
+        textarea, input {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+        }
+
+        div[data-testid="stMetric"] {
+            background-color: #F5F7FA;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
 
 # ---------------- TITLE ----------------
 st.title("🎓 AI Interview Coach")
@@ -157,7 +225,7 @@ if st.sidebar.button("Submit"):
         rule_fb = feedback(answer, keywords)
 
         # ==================================================
-        # ROW 1 → RESULT + YOUR ANSWER FEEDBACK
+        # ROW 1 → RESULT + FEEDBACK
         # ==================================================
         col1, col2 = st.columns([1, 2], gap="large")
 
@@ -169,7 +237,7 @@ if st.sidebar.button("Submit"):
                 color = "red"
                 label = "Weak"
             elif quality.lower() == "average":
-                color = "yellow"
+                color = "orange"
                 label = "Average"
             else:
                 color = "green"
@@ -191,12 +259,11 @@ if st.sidebar.button("Submit"):
                 unsafe_allow_html=True
             )
 
-            st.metric(label="Score", value=f"{score}/100")
+            st.metric("Score", f"{score}/10")
 
         # ---------------- RULE-BASED FEEDBACK ----------------
         with col2:
             st.subheader("🧠 Your Answer Feedback")
-
             if rule_fb:
                 for r in rule_fb:
                     st.write("•", r)
@@ -204,7 +271,7 @@ if st.sidebar.button("Submit"):
                 st.success("Looks good 👍 No major issues found.")
 
         # ==================================================
-        # ROW 2 → AI SUGGESTION (FULL WIDTH)
+        # ROW 2 → AI SUGGESTION
         # ==================================================
         st.markdown("---")
         st.subheader("🤖 Suggestion for You")
@@ -218,3 +285,4 @@ if st.sidebar.button("Submit"):
             value=llm_result,
             height=320
         )
+
