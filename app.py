@@ -1,124 +1,8 @@
-
-
-
-# # app.py
-# import streamlit as st
-# from Backend.llm_utils import get_gemini_feedback, llm_feedback
-# from Backend.evaluation import final_score, get_quality, feedback, keyword_map
-
-# # ---------------- PAGE CONFIG ----------------
-# st.set_page_config(
-#     page_title="AI Interview Feedback",
-#     page_icon="🎓",
-#     layout="wide"
-# )
-
-# # ---------------- TITLE ----------------
-# st.title("🎓 AI Interview Coach")
-# st.markdown("""
-# Enter your interview **question** and **answer** below.  
-# You will receive **result**, **answer feedback**, and **AI suggestions**.
-# """)
-
-# # ---------------- SIDEBAR INPUTS ----------------
-# st.sidebar.header("📝 Input Your Answer")
-# question = st.sidebar.text_input("Enter Interview Question")
-# answer = st.sidebar.text_area("Enter Your Answer", height=180)
-
-# # ---------------- SUBMIT ----------------
-# if st.sidebar.button("Submit"):
-
-#     if not question or not answer:
-#         st.warning("⚠ Please enter both question and answer")
-#     else:
-#         # ---------------- KEYWORD LOOKUP ----------------
-#         keywords = keyword_map.get(question)
-
-#         if not keywords:
-#             st.info("Extracting keywords using AI...")
-#             keywords_text = get_gemini_feedback(
-#                 f"Extract 5 important keywords as a Python list for this question:\n{question}"
-#             )
-#             try:
-#                 import ast
-#                 keywords = ast.literal_eval(keywords_text)
-#             except:
-#                 keywords = []
-
-#         # ---------------- RULE-BASED SCORING ----------------
-#         score = final_score(answer, keywords)
-#         quality = get_quality(score)
-#         rule_fb = feedback(answer, keywords)
-
-#         # ==================================================
-#         # ROW 1 → RESULT + YOUR ANSWER FEEDBACK
-#         # ==================================================
-#         col1, col2 = st.columns([1, 2], gap="large")
-
-#         # ---------------- RESULT ----------------
-#         with col1:
-#             st.subheader("📊 Result")
-
-#             if quality.lower() == "weak":
-#                 color = "red"
-#                 label = "Weak"
-#             elif quality.lower() == "average":
-#                 color = "yellow"
-#                 label = "Average"
-#             else:
-#                 color = "green"
-#                 label = "Good"
-
-#             st.markdown(
-#                 f"""
-#                 <div style="display:flex; align-items:center; gap:12px;">
-#                     <div style="width:16px;height:16px;
-#                                 background:{color};
-#                                 border-radius:50%;
-#                                 box-shadow:0 0 10px {color};">
-#                     </div>
-#                     <span style="font-size:20px; font-weight:600;">
-#                         {label}
-#                     </span>
-#                 </div>
-#                 """,
-#                 unsafe_allow_html=True
-#             )
-
-#             st.metric(label="Score", value=f"{score}/5")
-
-#         # ---------------- RULE-BASED FEEDBACK ----------------
-#         with col2:
-#             st.subheader("🧠 Your Answer Feedback")
-
-#             if rule_fb:
-#                 for r in rule_fb:
-#                     st.write("•", r)
-#             else:
-#                 st.success("Looks good 👍 No major issues found.")
-
-#         # ==================================================
-#         # ROW 2 → AI SUGGESTION (FULL WIDTH)
-#         # ==================================================
-#         st.markdown("---")
-#         st.subheader("🤖 Suggestion for You")
-
-#         with st.spinner("Generating AI feedback..."):
-#             prompt = llm_feedback(question, answer, rule_fb, quality)
-#             llm_result = get_gemini_feedback(prompt)
-
-#         st.text_area(
-#             label="AI Feedback",
-#             value=llm_result,
-#             height=320
-#         )
-
-
-# app.py
 import streamlit as st
 from Backend.llm_utils import get_gemini_feedback, llm_feedback
-from Backend.evaluation import final_score, get_quality, feedback, keyword_map
-
+from Backend.evaluation import final_score, get_quality, feedback, keyword_map,provide_feedback_for_any_question
+import streamlit as st
+from Backend.llm_utils import listen, speak
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="AI Interview Feedback",
@@ -199,6 +83,17 @@ st.sidebar.header("📝 Input Your Answer")
 question = st.sidebar.text_input("Enter Interview Question")
 answer = st.sidebar.text_area("Enter Your Answer", height=180)
 
+# Question input with mic
+if st.button("🎤 Speak Question"):
+    question = listen()
+    st.write("You said:", question)
+
+# Answer input with mic
+if st.button("🎤 Speak Answer"):
+    answer = listen()
+    st.write("You said:", answer)
+
+
 # ---------------- SUBMIT ----------------
 if st.sidebar.button("Submit"):
 
@@ -220,9 +115,20 @@ if st.sidebar.button("Submit"):
                 keywords = []
 
         # ---------------- RULE-BASED SCORING ----------------
+    
         score = final_score(answer, keywords)
         quality = get_quality(score)
         rule_fb = feedback(answer, keywords)
+
+        # ---------------- TTS + ANY QUESTION FEEDBACK ----------------
+        dataset_questions = list(keyword_map.keys())  # Ensure dataset questions list
+        feedback_text = provide_feedback_for_any_question(
+            question, answer, dataset_questions, keyword_map
+        )
+        st.text_area("Feedback", value=feedback_text, height=200)
+        speak(feedback_text)  # Text-to-speech feedback
+
+        
 
         # ==================================================
         # ROW 1 → RESULT + FEEDBACK

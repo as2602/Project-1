@@ -1,3 +1,5 @@
+from llm_utils import speak, get_gemini_feedback, llm_feedback
+
 keyword_map = {
     "What is supervised learning?": ["labeled data", "input", "output", "predict"],
     "What is unsupervised learning?": ["unlabeled data", "patterns", "clusters"],
@@ -86,3 +88,19 @@ def feedback(answer, keywords):
     if not has_example(answer):
         reasons.append("No example provided (optional)")
     return reasons
+  
+def provide_feedback_for_any_question(question, answer, dataset_questions, keyword_map):
+    if question in dataset_questions:
+        # Dataset question → rules-based
+        keywords = keyword_map.get(question, [])
+        reasons = feedback(answer, keywords)
+        feedback_text = "; ".join(reasons)
+        speak(feedback_text)
+        return feedback_text
+    else:
+        # Dataset me nahi → LLM feedback
+        prompt = llm_feedback(question, answer, [], "unknown")
+        feedback_text = get_gemini_feedback(prompt)
+        speak(feedback_text)
+        return feedback_text
+

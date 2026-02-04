@@ -3,6 +3,7 @@
 import os
 import google.generativeai as genai
 import pyttsx3
+import speech_recognition as sr
 from dotenv import load_dotenv
 
 
@@ -80,3 +81,17 @@ def speak(text):
     engine.say(text)
     engine.runAndWait()
 
+def listen():
+    """
+    Capture voice input from mic and return text
+    """
+    r = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = r.listen(source)
+    try:
+        text = r.recognize_google(audio)
+        return text
+    except Exception as e:
+        print("Could not understand audio:", e)
+        return ""
