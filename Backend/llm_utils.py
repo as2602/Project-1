@@ -2,7 +2,9 @@
 # Backend/llm_utils.py
 import os
 import google.generativeai as genai
+import pyttsx3
 from dotenv import load_dotenv
+
 
 # Load .env file
 load_dotenv()
@@ -67,3 +69,14 @@ Example:
     except Exception as e:
         print("Keyword generation failed:", e)
         return []
+
+
+def speak(text):
+    """
+    Convert text to speech.
+    Call this anywhere to speak out feedback or prompts.
+    """
+    engine = pyttsx3.init()
+    engine.say(text)
+    engine.runAndWait()
+
