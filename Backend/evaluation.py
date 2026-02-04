@@ -1,4 +1,4 @@
-from llm_utils import speak, get_gemini_feedback, llm_feedback
+from Backend.llm_utils import speak, get_gemini_feedback, llm_feedback
 
 keyword_map = {
     "What is supervised learning?": ["labeled data", "input", "output", "predict"],

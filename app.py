@@ -1,7 +1,6 @@
 import streamlit as st
 from Backend.llm_utils import get_gemini_feedback, llm_feedback
 from Backend.evaluation import final_score, get_quality, feedback, keyword_map,provide_feedback_for_any_question
-import streamlit as st
 from Backend.llm_utils import listen, speak
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
@@ -80,18 +79,37 @@ You will receive **result**, **answer feedback**, and **AI suggestions**.
 
 # ---------------- SIDEBAR INPUTS ----------------
 st.sidebar.header("📝 Input Your Answer")
-question = st.sidebar.text_input("Enter Interview Question")
-answer = st.sidebar.text_area("Enter Your Answer", height=180)
 
-# Question input with mic
-if st.button("🎤 Speak Question"):
-    question = listen()
-    st.write("You said:", question)
 
-# Answer input with mic
-if st.button("🎤 Speak Answer"):
-    answer = listen()
-    st.write("You said:", answer)
+
+# question = st.sidebar.text_input("Enter Interview Question")
+# answer = st.sidebar.text_area("Enter Your Answer", height=180)
+
+
+   
+# ---------------- QUESTION INPUT ----------------
+question = st.sidebar.text_input(
+    "Enter Interview Question",
+    value=st.session_state.get('question', "")  # session_state se initialize
+)
+
+# Mic button → update existing text_input
+if st.sidebar.button("🎤 Speak Question"):
+    spoken_text = listen()
+    st.session_state['question'] = spoken_text  # update session state
+    st.sidebar.text_input("Enter Interview Question", value=st.session_state['question'], key="question_input")
+
+# ---------------- ANSWER INPUT ----------------
+answer = st.sidebar.text_area(
+    "Enter Your Answer",
+    value=st.session_state.get('answer', ""),  # session_state se initialize
+    height=180
+)
+
+if st.sidebar.button("🎤 Speak Answer"):
+    spoken_answer = listen()
+    st.session_state['answer'] = spoken_answer
+    st.sidebar.text_area("Enter Your Answer", value=st.session_state['answer'], height=180, key="answer_input")
 
 
 # ---------------- SUBMIT ----------------

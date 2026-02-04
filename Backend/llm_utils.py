@@ -82,16 +82,14 @@ def speak(text):
     engine.runAndWait()
 
 def listen():
-    """
-    Capture voice input from mic and return text
-    """
     r = sr.Recognizer()
     with sr.Microphone() as source:
         print("Listening...")
-        audio = r.listen(source)
+        audio = r.listen(source, timeout=5)
     try:
         text = r.recognize_google(audio)
         return text
-    except Exception as e:
-        print("Could not understand audio:", e)
-        return ""
+    except sr.UnknownValueError:
+        return "Could not understand audio"
+    except sr.RequestError:
+        return "Speech service error"
