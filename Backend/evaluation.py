@@ -1,4 +1,4 @@
-from Backend.llm_utils import speak, get_gemini_feedback, llm_feedback
+# from Backend.llm_utils import speak, get_gemini_feedback, llm_feedback
 
 keyword_map = {
     "What is supervised learning?": ["labeled data", "input", "output", "predict"],
@@ -89,18 +89,43 @@ def feedback(answer, keywords):
         reasons.append("No example provided (optional)")
     return reasons
   
-def provide_feedback_for_any_question(question, answer, dataset_questions, keyword_map):
-    if question in dataset_questions:
-        # Dataset question → rules-based
-        keywords = keyword_map.get(question, [])
-        reasons = feedback(answer, keywords)
-        feedback_text = "; ".join(reasons)
-        speak(feedback_text)
-        return feedback_text
-    else:
-        # Dataset me nahi → LLM feedback
-        prompt = llm_feedback(question, answer, [], "unknown")
-        feedback_text = get_gemini_feedback(prompt)
-        speak(feedback_text)
-        return feedback_text
+# def provide_feedback_for_any_question(question, answer, dataset_questions, keyword_map):
+#     if question in dataset_questions:
+#         # Dataset question → rules-based
+#         keywords = keyword_map.get(question, [])
+#         reasons = feedback(answer, keywords)
+#         feedback_text = "; ".join(reasons)
+#         speak(feedback_text)
+#         return feedback_text
+#     else:
+#         # Dataset me nahi → LLM feedback
+#         prompt = llm_feedback(question, answer, [], "unknown")
+#         feedback_text = get_gemini_feedback(prompt)
+#         speak(feedback_text)
+#         return feedback_text
+def llm_feedback(question, user_answer, rule_feedback, quality, language="english"):
+    prompt = f"""
+You are an AI interview coach for freshers.
+
+Question:
+{question}
+
+User Answer:
+{user_answer}
+
+Rule-based Evaluation:
+Quality: {quality}
+Issues: {rule_feedback}
+
+Your task:
+1. Explain WHY the answer is weak or incorrect in simple words
+2. Give an IMPROVED correct answer
+3. Keep the tone friendly and fresher-level
+4. Language: {language}
+
+Return response in this format:
+- Reason:
+- Improved Answer:
+"""
+    return prompt
 

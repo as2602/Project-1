@@ -1,7 +1,8 @@
+
 import streamlit as st
 from Backend.llm_utils import get_gemini_feedback, llm_feedback
-from Backend.evaluation import final_score, get_quality, feedback, keyword_map,provide_feedback_for_any_question
-from Backend.llm_utils import listen, speak
+from Backend.evaluation import final_score, get_quality, feedback, keyword_map
+
 # ---------------- PAGE CONFIG ----------------
 st.set_page_config(
     page_title="AI Interview Feedback",
@@ -24,23 +25,10 @@ if dark_mode:
             background-color: #0E1117;
             color: #FAFAFA;
         }
-
         textarea, input {
             background-color: #1E1E1E !important;
             color: #FAFAFA !important;
         }
-
-        div[data-testid="stMetric"] {
-            background-color: #1E1E1E;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
-        .stTextArea textarea {
-            background-color: #1E1E1E !important;
-            color: #FAFAFA !important;
-        }
-
         </style>
         """,
         unsafe_allow_html=True
@@ -53,18 +41,10 @@ else:
             background-color: #FFFFFF;
             color: #000000;
         }
-
         textarea, input {
             background-color: #FFFFFF !important;
             color: #000000 !important;
         }
-
-        div[data-testid="stMetric"] {
-            background-color: #F5F7FA;
-            padding: 15px;
-            border-radius: 10px;
-        }
-
         </style>
         """,
         unsafe_allow_html=True
@@ -79,44 +59,15 @@ You will receive **result**, **answer feedback**, and **AI suggestions**.
 
 # ---------------- SIDEBAR INPUTS ----------------
 st.sidebar.header("📝 Input Your Answer")
-
-
-
-# question = st.sidebar.text_input("Enter Interview Question")
-# answer = st.sidebar.text_area("Enter Your Answer", height=180)
-
-
-   
-# ---------------- QUESTION INPUT ----------------
-question = st.sidebar.text_input(
-    "Enter Interview Question",
-    value=st.session_state.get('question', "")  # session_state se initialize
-)
-
-# Mic button → update existing text_input
-if st.sidebar.button("🎤 Speak Question"):
-    spoken_text = listen()
-    st.session_state['question'] = spoken_text  # update session state
-    st.sidebar.text_input("Enter Interview Question", value=st.session_state['question'], key="question_input")
-
-# ---------------- ANSWER INPUT ----------------
-answer = st.sidebar.text_area(
-    "Enter Your Answer",
-    value=st.session_state.get('answer', ""),  # session_state se initialize
-    height=180
-)
-
-if st.sidebar.button("🎤 Speak Answer"):
-    spoken_answer = listen()
-    st.session_state['answer'] = spoken_answer
-    st.sidebar.text_area("Enter Your Answer", value=st.session_state['answer'], height=180, key="answer_input")
-
+question = st.sidebar.text_input("Enter Interview Question")
+answer = st.sidebar.text_area("Enter Your Answer", height=180)
 
 # ---------------- SUBMIT ----------------
 if st.sidebar.button("Submit"):
 
     if not question or not answer:
         st.warning("⚠ Please enter both question and answer")
+
     else:
         # ---------------- KEYWORD LOOKUP ----------------
         keywords = keyword_map.get(question)
@@ -133,20 +84,9 @@ if st.sidebar.button("Submit"):
                 keywords = []
 
         # ---------------- RULE-BASED SCORING ----------------
-    
         score = final_score(answer, keywords)
         quality = get_quality(score)
         rule_fb = feedback(answer, keywords)
-
-        # ---------------- TTS + ANY QUESTION FEEDBACK ----------------
-        dataset_questions = list(keyword_map.keys())  # Ensure dataset questions list
-        feedback_text = provide_feedback_for_any_question(
-            question, answer, dataset_questions, keyword_map
-        )
-        st.text_area("Feedback", value=feedback_text, height=200)
-        speak(feedback_text)  # Text-to-speech feedback
-
-        
 
         # ==================================================
         # ROW 1 → RESULT + FEEDBACK
@@ -197,7 +137,6 @@ if st.sidebar.button("Submit"):
         # ==================================================
         # ROW 2 → AI SUGGESTION
         # ==================================================
-        st.markdown("---")
         st.subheader("🤖 Suggestion for You")
 
         with st.spinner("Generating AI feedback..."):
@@ -209,4 +148,3 @@ if st.sidebar.button("Submit"):
             value=llm_result,
             height=320
         )
-

@@ -67,33 +67,33 @@ Return ONLY a Python list.
         return []
 
 
-# ---------------- SAFE AUDIO FUNCTIONS ---------------- #
+# # ---------------- SAFE AUDIO FUNCTIONS ---------------- #
 
-def speak(text):
-    """
-    Text-to-speech (DISABLED in production).
-    """
-    if IS_PRODUCTION:
-        return  # Do nothing on Render
+# def speak(text):
+#     """
+#     Text-to-speech (DISABLED in production).
+#     """
+#     if IS_PRODUCTION:
+#         return  # Do nothing on Render
 
-    import pyttsx3
-    engine = pyttsx3.init()
-    engine.say(text)
-    engine.runAndWait()
+#     import pyttsx3
+#     engine = pyttsx3.init()
+#     engine.say(text)
+#     engine.runAndWait()
 
 
-def listen():
-    """
-    Speech-to-text (DISABLED in production).
-    """
-    if IS_PRODUCTION:
-        return ""
+# def listen():
+#     """
+#     Speech-to-text (DISABLED in production).
+#     """
+#     if IS_PRODUCTION:
+#         return ""
 
-    import speech_recognition as sr
-    r = sr.Recognizer()
-    with sr.Microphone() as source:
-        audio = r.listen(source, timeout=5)
-    try:
-        return r.recognize_google(audio)
-    except:
-        return ""
+#     import speech_recognition as sr
+#     r = sr.Recognizer()
+#     with sr.Microphone() as source:
+#         audio = r.listen(source, timeout=5)
+#     try:
+#         return r.recognize_google(audio)
+#     except:
+#         return ""
