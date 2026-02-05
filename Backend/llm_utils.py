@@ -1,21 +1,18 @@
-
 # Backend/llm_utils.py
 import os
 import google.generativeai as genai
-import pyttsx3
-import speech_recognition as sr
 from dotenv import load_dotenv
 
-
-# Load .env file
+# Load env vars
 load_dotenv()
+
+IS_PRODUCTION = os.getenv("IS_PRODUCTION") == "true"
 
 # Configure Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Create model
-# New
 model = genai.GenerativeModel("gemini-flash-latest")
+
 
 def get_gemini_feedback(prompt):
     try:
@@ -61,8 +58,6 @@ Question:
 {question}
 
 Return ONLY a Python list.
-Example:
-["keyword1", "keyword2", "keyword3"]
 """
     try:
         response = model.generate_content(prompt)
@@ -72,24 +67,33 @@ Example:
         return []
 
 
+# ---------------- SAFE AUDIO FUNCTIONS ---------------- #
+
 def speak(text):
     """
-    Convert text to speech.
-    Call this anywhere to speak out feedback or prompts.
+    Text-to-speech (DISABLED in production).
     """
+    if IS_PRODUCTION:
+        return  # Do nothing on Render
+
+    import pyttsx3
     engine = pyttsx3.init()
     engine.say(text)
     engine.runAndWait()
 
+
 def listen():
+    """
+    Speech-to-text (DISABLED in production).
+    """
+    if IS_PRODUCTION:
+        return ""
+
+    import speech_recognition as sr
     r = sr.Recognizer()
     with sr.Microphone() as source:
-        print("Listening...")
         audio = r.listen(source, timeout=5)
     try:
-        text = r.recognize_google(audio)
-        return text
-    except sr.UnknownValueError:
-        return "Could not understand audio"
-    except sr.RequestError:
-        return "Speech service error"
+        return r.recognize_google(audio)
+    except:
+        return ""
